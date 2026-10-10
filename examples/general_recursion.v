@@ -51,6 +51,9 @@ Instance wf_total_init_compute : forall {A}, WellFounded (@total_relation A).
   exact (fun A => Acc_intro_generator 10 wf_total_init).
 Defined.
 
+Section FuelledRecursion.
+(* Prove equations by rewriting, without reducing the fuelled recursors. *)
+Local Ltac DepElim.solve_equation c ::= fail.
 Set Warnings "-solve_obligation_error".
 
 (** Now we define an obviously non-terminating function. *)
@@ -63,10 +66,10 @@ Proof.
   constructor.
 Defined.
   Local Obligation Tactic := idtac.
-  (** The automation has a little trouble here as it assumes
-      well-founded definitions implicitely.  We show the second
-      equation: [nonterm (S n) = S (nonterm (S n))] using the
-      unfolding equation. *)
+  (* Prove both equations with the unfolding lemma. *)
+  Next Obligation.
+    intros. now rewrite nonterm_unfold_eq at 1.
+  Defined.
   Next Obligation.
     intros. now rewrite nonterm_unfold_eq at 1.
   Defined.
@@ -111,14 +114,13 @@ Section Y.
   Defined.
 
   Obligation Tactic := idtac.
-  (** The automation has a little trouble here as it assumes
-      well-founded definitions implicitely.  We show the second
-      equation: [nonterm (S n) = S (nonterm (S n))] using the
-      unfolding equation. *)
+  (* Prove the equation with the unfolding lemma. *)
   Next Obligation.
     intros. now rewrite Y_unfold_eq at 1.
   Defined.
 End Y.
+
+End FuelledRecursion.
 
 (** Using [Y], we can easily define any general recursive function. *)
 Definition fact :=
